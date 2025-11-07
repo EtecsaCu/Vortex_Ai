@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - Vortex AI</title>
+    <style>
+        body {
+            background: linear-gradient(135deg, #0c0c0c, #1a1a2e);
+            color: white;
+            font-family: 'Segoe UI', sans-serif;
+            margin: 0;
+            padding: 2rem;
+            text-align: center;
+        }
+        .dashboard {
+            max-width: 800px;
+            margin: 0 auto;
+            background: rgba(255,255,255,0.1);
+            padding: 3rem;
+            border-radius: 20px;
+        }
+        .service-card {
+            background: rgba(255,255,255,0.05);
+            padding: 2rem;
+            margin: 1rem;
+            border-radius: 15px;
+            border: 1px solid rgba(255,255,255,0.2);
+        }
+    </style>
+</head>
+<body>
+    <div class="dashboard">
+        <h1>🤖 Dashboard Vortex AI</h1>
+        <p>Bienvenido <span id="userName"></span></p>
+        
+        <div class="service-card">
+            <h3>🤖 Chatbot IA</h3>
+            <p>Asistente inteligente gratuito</p>
+        </div>
+        
+        <div class="service-card">
+            <h3>📈 Crecimiento Orgánico</h3>
+            <p>Seguidores reales para tus redes</p>
+        </div>
+        
+        <div class="service-card">
+            <h3>🛡️ Herramientas Éticas</h3>
+            <p>Acceso a suite de seguridad</p>
+        </div>
+        
+        <button onclick="logout()" style="background: red; color: white; padding: 10px 20px; border: none; border-radius: 10px; margin-top: 2rem;">
+            Cerrar Sesión
+        </button>
+    </div>
+
+    <script>
+        // Mostrar nombre de usuario
+        const user = localStorage.getItem('vortex_user');
+        if (user) {
+            document.getElementById('userName').textContent = user;
+        } else {
+            window.location.href = 'index.html';
+        }
+
+        function logout() {
+            localStorage.removeItem('vortex_user');
+            window.location.href = 'index.html';
+        }
+    </script>
+</body>
+</html>
