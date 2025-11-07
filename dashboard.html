@@ -27,35 +27,49 @@
             border-radius: 15px;
             border: 1px solid rgba(255,255,255,0.2);
         }
+        .logout-btn {
+            background: #dc2626;
+            color: white;
+            padding: 12px 25px;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            margin-top: 2rem;
+        }
     </style>
 </head>
 <body>
     <div class="dashboard">
         <h1>🤖 Dashboard Vortex AI</h1>
-        <p>Bienvenido <span id="userName"></span></p>
+        <p>Bienvenido <span id="userName" style="color: #3b82f6; font-weight: bold;"></span></p>
         
         <div class="service-card">
             <h3>🤖 Chatbot IA</h3>
-            <p>Asistente inteligente gratuito</p>
+            <p>Asistente inteligente gratuito 24/7</p>
         </div>
         
         <div class="service-card">
             <h3>📈 Crecimiento Orgánico</h3>
-            <p>Seguidores reales para tus redes</p>
+            <p>Seguidores reales para tus redes sociales</p>
         </div>
         
         <div class="service-card">
             <h3>🛡️ Herramientas Éticas</h3>
-            <p>Acceso a suite de seguridad</p>
+            <p>Suite de seguridad para pruebas autorizadas</p>
         </div>
         
-        <button onclick="logout()" style="background: red; color: white; padding: 10px 20px; border: none; border-radius: 10px; margin-top: 2rem;">
+        <div class="service-card">
+            <h3>🔄 Growth Mutuo</h3>
+            <p>Comunidad de apoyo para crecimiento</p>
+        </div>
+        
+        <button onclick="logout()" class="logout-btn">
             Cerrar Sesión
         </button>
     </div>
 
     <script>
-        // Mostrar nombre de usuario
+        // Verificar login y mostrar usuario
         const user = localStorage.getItem('vortex_user');
         if (user) {
             document.getElementById('userName').textContent = user;
